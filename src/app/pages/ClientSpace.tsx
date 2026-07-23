@@ -164,7 +164,14 @@ function LoginPage({ onAuthenticated }: { onAuthenticated: (session: ClientSessi
     event.preventDefault();
     requestClientLoginCode({ email, password })
       .then((response) => {
-        setPendingAccount({ id: 0, firstName: "", lastName: "", email: response.email, phonePrefix: "", phone: "", marketing: false, verified: response.verified });
+        if (response.sessionToken && response.client) {
+          const session = toSession(response.client);
+          if (remember) writeClientSessionToken(response.sessionToken);
+          onAuthenticated(session);
+          navigate(redirectTo);
+          return;
+        }
+        setPendingAccount({ id: 0, firstName: "", lastName: "", email: response.email, phonePrefix: "", phone: "", marketing: false, verified: !!response.verified });
         setStep("code");
         toast.success("Code envoyé par email", { description: "Ouvre Mailpit pour récupérer le code de connexion." });
       })
@@ -268,6 +275,14 @@ function RegisterPage({ onAuthenticated }: { onAuthenticated: (session: ClientSe
       marketing: form.marketing,
     })
       .then((response) => {
+        if (response.sessionToken && response.client) {
+          const session = toSession(response.client);
+          writeClientSessionToken(response.sessionToken);
+          onAuthenticated(session);
+          toast.success("Compte créé", { description: "Validation email désactivée pour les tests." });
+          navigate(redirectTo);
+          return;
+        }
         setPendingAccount({ id: 0, firstName: form.firstName, lastName: form.lastName, email: response.email, phonePrefix: form.phonePrefix, phone: form.phone, marketing: form.marketing, verified: false });
         toast.success("Compte créé", { description: "Ouvre Mailpit pour récupérer le code de validation." });
       })

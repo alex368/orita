@@ -898,11 +898,19 @@ export async function getClientAccounts(): Promise<ClientAccount[]> {
   return apiFetch<ClientAccount[]>("/admin/client-accounts");
 }
 
-export async function registerClientAccount(input: { firstName: string; lastName: string; email: string; phonePrefix: string; phone: string; password: string; marketing: boolean }): Promise<{ message: string; email: string }> {
+type ClientAuthResponse = {
+  message: string;
+  email: string;
+  verified?: boolean;
+  sessionToken?: string;
+  client?: ClientAccount;
+};
+
+export async function registerClientAccount(input: { firstName: string; lastName: string; email: string; phonePrefix: string; phone: string; password: string; marketing: boolean }): Promise<ClientAuthResponse> {
   return publicApiFetch("/client-auth/register", { method: "POST", body: JSON.stringify(input) });
 }
 
-export async function requestClientLoginCode(input: { email: string; password: string }): Promise<{ message: string; email: string; verified: boolean }> {
+export async function requestClientLoginCode(input: { email: string; password: string }): Promise<ClientAuthResponse> {
   return publicApiFetch("/client-auth/request-login-code", { method: "POST", body: JSON.stringify(input) });
 }
 
