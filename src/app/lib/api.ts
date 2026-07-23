@@ -183,6 +183,7 @@ export interface AiConfiguration {
   model: string;
   systemPrompt: string;
   fallbackAnswer: string;
+  knowledgeBase: { input: string; answer: string }[];
   temperature: number;
   maxTokens: number;
   ollamaBaseUrl?: string;
@@ -191,7 +192,7 @@ export interface AiConfiguration {
 
 export interface AiChatResponse {
   answer: string;
-  source: "ollama" | "fallback";
+  source: "ollama" | "fallback" | "knowledge";
   model: string;
   error?: string;
 }

@@ -246,6 +246,7 @@ type AiConfigurationForm = {
   model: string;
   systemPrompt: string;
   fallbackAnswer: string;
+  knowledgeBase: { input: string; answer: string }[];
   temperature: string;
   maxTokens: string;
 };
@@ -447,6 +448,7 @@ const emptyAiConfiguration: AiConfigurationForm = {
   model: "llama3.2:1b",
   systemPrompt: "Tu es Orita, l'assistant local du site ORITA. Réponds en français, simplement, en moins de 6 phrases. Aide sur les parcours, chauffeurs, locations, bons plans, réservations et contact. Si tu n'es pas sûr, propose de contacter l'équipe.",
   fallbackAnswer: "Je suis Orita. Je peux répondre aux questions simples sur le site, les réservations, les chauffeurs, les locations et les bons plans. Le moteur local est indisponible pour le moment, mais votre message est bien pris en compte.",
+  knowledgeBase: [{ input: "", answer: "" }],
   temperature: "0.2",
   maxTokens: "220",
 };
@@ -708,9 +710,16 @@ function aiConfigurationToForm(configuration: AiConfiguration | null): AiConfigu
     model: configuration.model,
     systemPrompt: configuration.systemPrompt,
     fallbackAnswer: configuration.fallbackAnswer,
+    knowledgeBase: configuration.knowledgeBase?.length ? configuration.knowledgeBase : [{ input: "", answer: "" }],
     temperature: String(configuration.temperature),
     maxTokens: String(configuration.maxTokens),
   };
+}
+
+function normalizeAiKnowledgeBase(rows: AiConfigurationForm["knowledgeBase"]) {
+  return rows
+    .map((row) => ({ input: row.input.trim(), answer: row.answer.trim() }))
+    .filter((row) => row.input && row.answer);
 }
 
 function aiConfigurationPayload(form: AiConfigurationForm): AiConfigurationInput {
@@ -722,6 +731,7 @@ function aiConfigurationPayload(form: AiConfigurationForm): AiConfigurationInput
     model: form.model,
     systemPrompt: form.systemPrompt,
     fallbackAnswer: form.fallbackAnswer,
+    knowledgeBase: normalizeAiKnowledgeBase(form.knowledgeBase),
     temperature: Number.isFinite(temperature) ? temperature : 0.2,
     maxTokens: Number.isFinite(maxTokens) ? maxTokens : 220,
   };
@@ -1337,6 +1347,17 @@ export function Admin() {
 
     if (!payload.model.trim() || !payload.systemPrompt.trim()) {
       toast.error("Renseigne le modèle et le prompt système");
+      return;
+    }
+
+    const hasIncompleteKnowledgeRow = aiConfigurationForm.knowledgeBase.some((row) => {
+      const hasInput = row.input.trim() !== "";
+      const hasAnswer = row.answer.trim() !== "";
+
+      return hasInput !== hasAnswer;
+    });
+    if (hasIncompleteKnowledgeRow) {
+      toast.error("Chaque connaissance IA doit avoir un input et une réponse");
       return;
     }
 
@@ -4060,6 +4081,71 @@ function AiConfigurationSection({ configuration, form, setForm, onSubmit }: {
               value={form.fallbackAnswer}
               onChange={(event) => setForm({ ...form, fallbackAnswer: event.target.value })}
             />
+          </div>
+
+          <div className="space-y-3 rounded-md border border-stone-200 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <Label>Base de connaissances locale</Label>
+                <p className="mt-1 text-xs text-stone-500">
+                  Ajoute plusieurs réponses prioritaires. Un input correspond à une réponse.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-md"
+                onClick={() => setForm({ ...form, knowledgeBase: [...form.knowledgeBase, { input: "", answer: "" }] })}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Ajouter une réponse
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              {form.knowledgeBase.map((item, index) => (
+                <div key={index} className="grid gap-3 rounded-md border border-stone-200 bg-stone-50 p-3 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)_auto]">
+                  <div className="min-w-0">
+                    <Label>Input {index + 1}</Label>
+                    <Input
+                      className="mt-2"
+                      value={item.input}
+                      onChange={(event) => {
+                        const knowledgeBase = form.knowledgeBase.map((row, rowIndex) => rowIndex === index ? { ...row, input: event.target.value } : row);
+                        setForm({ ...form, knowledgeBase });
+                      }}
+                      placeholder="Ex : comment réserver ?"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <Label>Réponse</Label>
+                    <Textarea
+                      className="mt-2 min-h-24"
+                      value={item.answer}
+                      onChange={(event) => {
+                        const knowledgeBase = form.knowledgeBase.map((row, rowIndex) => rowIndex === index ? { ...row, answer: event.target.value } : row);
+                        setForm({ ...form, knowledgeBase });
+                      }}
+                      placeholder="Réponse envoyée automatiquement par Orita."
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full rounded-md border-red-200 text-red-700 hover:bg-red-50 lg:w-auto"
+                      onClick={() => {
+                        const knowledgeBase = form.knowledgeBase.filter((_, rowIndex) => rowIndex !== index);
+                        setForm({ ...form, knowledgeBase: knowledgeBase.length ? knowledgeBase : [{ input: "", answer: "" }] });
+                      }}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Supprimer
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">

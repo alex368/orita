@@ -3,7 +3,7 @@ import { useLocation } from "react-router";
 import { MessageCircle, Send, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { askOrita, createChatMessage, getChatMessages } from "../lib/api";
+import { askOrita } from "../lib/api";
 
 interface ChatMessage {
   role: "assistant" | "user";
@@ -45,16 +45,9 @@ export function PageChat() {
   }), [pageLabel]);
 
   useEffect(() => {
-    getChatMessages(pathname)
-      .then((storedMessages) => {
-        const pageMessages = storedMessages.filter((message) => message.pagePath === pathname);
-        if (pageMessages.length > 0) {
-          setMessages(pageMessages.map((message) => ({ role: message.role, text: message.text })));
-          return;
-        }
-        setMessages([initialMessage]);
-      })
-      .catch(() => setMessages([initialMessage]));
+    setMessages([initialMessage]);
+    setInput("");
+    setIsThinking(false);
   }, [initialMessage, pathname]);
 
   const handleSubmit = async (event: FormEvent) => {
@@ -67,7 +60,6 @@ export function PageChat() {
 
     const nextMessages: ChatMessage[] = [...messages, { role: "user", text }];
     setMessages(nextMessages);
-    createChatMessage({ pagePath: pathname, role: "user", text }).catch(() => undefined);
     setInput("");
     setIsThinking(true);
 
@@ -80,14 +72,12 @@ export function PageChat() {
       });
       const answer: ChatMessage = { role: "assistant", text: response.answer };
       setMessages((current) => [...current, answer]);
-      createChatMessage({ pagePath: pathname, role: "assistant", text: answer.text }).catch(() => undefined);
     } catch {
       const answer: ChatMessage = {
         role: "assistant",
         text: "Je suis Orita. Le service IA local ne répond pas pour le moment, mais votre message est bien pris en compte.",
       };
       setMessages((current) => [...current, answer]);
-      createChatMessage({ pagePath: pathname, role: "assistant", text: answer.text }).catch(() => undefined);
     } finally {
       setIsThinking(false);
     }
