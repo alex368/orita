@@ -1067,7 +1067,7 @@ export async function createStripeCheckout(input: {
   });
 }
 
-export async function requestAdminLoginCode(input: { email: string; password: string }): Promise<{ message: string; email: string }> {
+export async function requestAdminLoginCode(input: { email: string; password: string }): Promise<{ message: string; email: string; sessionToken?: string }> {
   return publicApiFetch("/admin-auth/request-code", {
     method: "POST",
     body: JSON.stringify(input),

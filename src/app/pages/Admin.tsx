@@ -1078,6 +1078,14 @@ export function Admin() {
     setLoginLoading(true);
     try {
       const response = await requestAdminLoginCode({ email: adminEmail, password });
+      if (response.sessionToken) {
+        persistAdminSession(response.sessionToken);
+        setIsAuthenticated(true);
+        toast.success("Connexion admin autorisée", {
+          description: "Vérification email désactivée pour les tests.",
+        });
+        return;
+      }
       setLoginEmailSentTo(response.email);
       setLoginStep("code");
       toast.success("Code envoyé par email", {
