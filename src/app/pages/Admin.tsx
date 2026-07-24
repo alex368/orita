@@ -742,7 +742,7 @@ export function Admin() {
   const { pathname } = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginStep, setLoginStep] = useState<"credentials" | "code">("credentials");
-  const [adminEmail, setAdminEmail] = useState("admin@benintours.local");
+  const [adminEmail, setAdminEmail] = useState("admin.demo@benintours.local");
   const [password, setPassword] = useState("");
   const [loginCode, setLoginCode] = useState("");
   const [loginEmailSentTo, setLoginEmailSentTo] = useState("");
@@ -1518,12 +1518,12 @@ export function Admin() {
                     <Label>Email administrateur</Label>
                     <div className="relative mt-2">
                       <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
-                      <Input type="email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} placeholder="admin@benintours.local" className="h-11 pl-9" />
+                      <Input type="email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} placeholder="admin.demo@benintours.local" className="h-11 pl-9" />
                     </div>
                   </div>
                   <div>
                     <Label>Mot de passe</Label>
-                    <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="admin123" className="mt-2 h-11" />
+                    <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Admin123!" className="mt-2 h-11" />
                   </div>
                   <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
                     Une alerte de connexion avec un code à 6 chiffres sera envoyée sur le service email local.
@@ -1531,7 +1531,7 @@ export function Admin() {
                   <Button type="submit" className="h-11 w-full rounded-md bg-emerald-900 text-white hover:bg-emerald-800" disabled={loginLoading}>
                     {loginLoading ? "Envoi du code..." : "Recevoir le code"}
                   </Button>
-                  <p className="text-xs text-stone-500">Démo locale : `admin@benintours.local` / `admin123`.</p>
+                  <p className="text-xs text-stone-500">Démo locale : `admin.demo@benintours.local` / `Admin123!`.</p>
                 </form>
               ) : (
                 <form onSubmit={handleVerifyCode} className="space-y-5">
