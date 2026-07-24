@@ -1515,7 +1515,7 @@ export function Admin() {
               <div>
                 <CardTitle className="text-2xl">Connexion Admin</CardTitle>
                 <p className="mt-2 text-sm leading-6 text-stone-600">
-                  Accès protégé par email, mot de passe et code de vérification local.
+                  Accès administrateur de test par email et mot de passe.
                 </p>
               </div>
             </CardHeader>
@@ -1534,10 +1534,10 @@ export function Admin() {
                     <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Admin123!" className="mt-2 h-11" />
                   </div>
                   <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-                    Une alerte de connexion avec un code à 6 chiffres sera envoyée sur le service email local.
+                    La vérification par email est désactivée temporairement pour les tests.
                   </div>
                   <Button type="submit" className="h-11 w-full rounded-md bg-emerald-900 text-white hover:bg-emerald-800" disabled={loginLoading}>
-                    {loginLoading ? "Envoi du code..." : "Recevoir le code"}
+                    {loginLoading ? "Connexion..." : "Se connecter"}
                   </Button>
                   <p className="text-xs text-stone-500">Démo locale : `admin.demo@benintours.local` / `Admin123!`.</p>
                 </form>
